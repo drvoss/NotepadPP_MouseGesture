@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:     [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build (Release | x64)
+        run: msbuild MouseGes.sln /p:Configuration=Release /p:Platform=x64 /nologo /v:minimal
+
+      - name: Package plugin folder structure
+        run: |
+          New-Item -ItemType Directory -Path dist\MouseGes -Force | Out-Null
+          Copy-Item bin\x64\Release\MouseGes.dll dist\MouseGes\MouseGes.dll
+          Compress-Archive -Path dist\MouseGes -DestinationPath MouseGes.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MouseGes
+          path: MouseGes.zip
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MouseGes.zip
+          generate_release_notes: true

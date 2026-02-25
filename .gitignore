@@ -1,0 +1,14 @@
+# Visual Studio IDE local settings
+.vs/
+
+# Build output
+bin/
+
+# Intermediate build files
+build/
+
+# Per-user project settings (local debug configuration)
+*.vcxproj.user
+
+# Reverse engineering artifacts
+target/
